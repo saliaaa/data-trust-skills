@@ -1,0 +1,46 @@
+{
+  "status": "pending",
+  "reason": "no credentials",
+  "date": "2026-11-08",
+  "model": null,
+  "run_count": 0,
+  "runs_requested_per_case": 0,
+  "cases": [
+    "demo-revenue-high",
+    "refund-join-fanout",
+    "timezone-day-shift"
+  ],
+  "clients": [
+    {
+      "id": "cursor-agent",
+      "display": "Cursor",
+      "binary": "cursor-agent",
+      "installed": true,
+      "version": "2026.11.05-86047df",
+      "authenticated": false,
+      "skill_trigger": "not run (no credentials)",
+      "probe_exit_code": 1
+    },
+    {
+      "id": "claude-code",
+      "display": "Claude Code",
+      "binary": "claude",
+      "installed": true,
+      "version": "2.1.319 (Claude Code)",
+      "authenticated": false,
+      "skill_trigger": "not run (no credentials)",
+      "probe_exit_code": 1
+    },
+    {
+      "id": "codex",
+      "display": "Codex",
+      "binary": "codex",
+      "installed": true,
+      "version": "codex-cli 0.167.0",
+      "authenticated": false,
+      "skill_trigger": "not run (no credentials)",
+      "probe_exit_code": 1
+    }
+  ],
+  "results": []
+}

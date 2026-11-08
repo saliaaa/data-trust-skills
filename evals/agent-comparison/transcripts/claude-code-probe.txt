@@ -1,0 +1,30 @@
+exit=0
+--- stdout ---
+2.1.319 (Claude Code)
+
+--- stderr ---
+
+
+--- auth ---
+exit=1
+--- stdout ---
+{
+  "loggedIn": false,
+  "authMethod": "none",
+  "apiProvider": "firstParty",
+  "analyticsDisabled": false,
+  "projectsDirectory": "/home/ubuntu/.claude/projects",
+  "configDirectory": "/home/ubuntu/.claude",
+  "loginExpiresAt": null
+}
+
+--- stderr ---
+
+
+--- prompt attempt ---
+exit=1
+--- stdout ---
+Not logged in · Please run /login
+
+--- stderr ---
+
