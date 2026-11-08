@@ -1,0 +1,26 @@
+id: reconcile-segment-gap
+skill: reconcile-metric-values
+summary: The EU segment is 30 higher on the left. US-East matches, so the whole gap is that segment.
+setup_sql: SELECT 1
+left_sql: |
+  SELECT region, revenue FROM (
+    VALUES
+      ('US-East', 100.00::DECIMAL(12, 2)),
+      ('EU', 80.00::DECIMAL(12, 2))
+  ) AS v(region, revenue)
+right_sql: |
+  SELECT region, revenue FROM (
+    VALUES
+      ('US-East', 100.00::DECIMAL(12, 2)),
+      ('EU', 50.00::DECIMAL(12, 2))
+  ) AS v(region, revenue)
+arguments:
+  metric: revenue
+  keys: [region]
+  segments: [region]
+  record_key: region
+expect:
+  exit_code: 2
+  finding_codes: [metric_mismatch]
+  min_values:
+    difference: "30"

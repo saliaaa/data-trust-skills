@@ -1,0 +1,29 @@
+id: contract-missing-owner
+skill: define-metric-contract
+summary: A contract with no owner is invalid. The helper must not invent one.
+contract_yaml: |
+  metric: gross_item_revenue
+  version: 1
+  grain:
+    - order_date
+  numerator:
+    expression: quantity * unit_price
+    source: order_items
+    aggregation: sum
+  denominator: null
+  population:
+    description: Completed orders.
+    predicate: orders.status = 'completed'
+  exclusions: []
+  dimensions:
+    - name: order_date
+      expression: business calendar date
+  time:
+    timezone: America/New_York
+    boundary: "[start, end)"
+  tolerance:
+    absolute: "0.01"
+expect:
+  exit_code: 2
+  valid: false
+  error_contains: owner

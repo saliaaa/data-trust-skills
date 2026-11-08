@@ -1,0 +1,27 @@
+id: timezone-day-shift
+skill: test-time-semantics
+summary: A UTC calendar date puts the 03:30 UTC order on the next day relative to America/New_York.
+setup_sql: |
+  CREATE TABLE events (
+    order_id VARCHAR,
+    ordered_at TIMESTAMP,
+    line_amount DECIMAL(12, 2)
+  );
+  INSERT INTO events VALUES
+    ('o_early', TIMESTAMP '2024-01-15 03:30:00', 80.00::DECIMAL(12, 2)),
+    ('o_afternoon', TIMESTAMP '2024-01-15 15:00:00', 10.00::DECIMAL(12, 2));
+source_sql: SELECT order_id, ordered_at, line_amount FROM events
+arguments:
+  timestamp_column: ordered_at
+  storage: utc_timestamp
+  stored_timezone: UTC
+  business_timezone: America/New_York
+  model_date_sql: CAST(ordered_at AS DATE)
+  measure_sql: line_amount
+  id_column: order_id
+expect:
+  exit_code: 2
+  finding_codes: [date_shift]
+  min_values:
+    shifted_rows: 1
+    shifted_measure: "80"

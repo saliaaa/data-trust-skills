@@ -1,0 +1,12 @@
+{
+  "name": "data-trust-skills",
+  "description": "Checks that prove a dashboard number is right: grain, reconciliation, time semantics, and metric contracts.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "author": {
+    "name": "saliaaa",
+    "url": "https://github.com/saliaaa"
+  },
+  "repository": "https://github.com/saliaaa/data-trust-skills",
+  "keywords": ["metrics", "sql", "data-quality"]
+}

@@ -1,0 +1,17 @@
+id: fiscal-versus-calendar
+skill: test-time-semantics
+summary: With a fiscal year that starts in April, a March date is still in the previous fiscal year.
+setup_sql: |
+  CREATE TABLE events (ordered_at TIMESTAMP);
+  INSERT INTO events VALUES
+    (TIMESTAMP '2024-03-15 00:00:00'),
+    (TIMESTAMP '2024-06-15 00:00:00');
+source_sql: SELECT ordered_at FROM events
+arguments:
+  timestamp_column: ordered_at
+  fiscal_start_month: 4
+expect:
+  exit_code: 2
+  finding_codes: [fiscal_mismatch]
+  min_values:
+    fiscal_mismatches: 1

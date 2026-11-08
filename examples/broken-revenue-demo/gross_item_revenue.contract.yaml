@@ -1,0 +1,31 @@
+metric: gross_item_revenue
+version: 1
+owner: metric-owner
+description: Sum of completed-order line amounts, dated in America/New_York.
+grain:
+  - order_date
+  - region
+numerator:
+  expression: quantity * unit_price
+  source: order_items
+  aggregation: sum
+denominator: null
+population:
+  description: Orders whose status is completed.
+  predicate: orders.status = 'completed'
+exclusions:
+  - Orders whose status is not completed.
+dimensions:
+  - name: order_date
+    expression: America/New_York calendar date of orders.ordered_at
+  - name: region
+    expression: customers.region
+time:
+  timezone: America/New_York
+  stored_timezone: UTC
+  boundary: "[start, end)"
+  fiscal_start_month: 1
+tolerance:
+  absolute: "0.01"
+  relative: "0.0001"
+notes: Refunds are not part of this metric. Joining them into the line sum is a defect.

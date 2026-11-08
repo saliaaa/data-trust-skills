@@ -1,0 +1,35 @@
+[
+  {
+    "name": "completed_orders",
+    "relationship": "base",
+    "grain": ["order_id"],
+    "sql": "SELECT order_id, customer_id, ordered_at FROM orders WHERE status = 'completed'"
+  },
+  {
+    "name": "items_joined",
+    "relationship": "one_to_many",
+    "parent": "completed_orders",
+    "parent_key": ["order_id"],
+    "grain": ["order_item_id"],
+    "measure": "line_amount",
+    "sql": "SELECT o.order_id, oi.order_item_id, oi.quantity * oi.unit_price AS line_amount FROM orders AS o INNER JOIN order_items AS oi ON o.order_id = oi.order_id WHERE o.status = 'completed'"
+  },
+  {
+    "name": "customers_joined",
+    "relationship": "many_to_one",
+    "parent": "items_joined",
+    "parent_key": ["order_item_id"],
+    "grain": ["order_item_id"],
+    "measure": "line_amount",
+    "sql": "SELECT o.order_id, oi.order_item_id, c.region, oi.quantity * oi.unit_price AS line_amount FROM orders AS o INNER JOIN order_items AS oi ON o.order_id = oi.order_id INNER JOIN customers AS c ON o.customer_id = c.customer_id WHERE o.status = 'completed'"
+  },
+  {
+    "name": "refunds_joined",
+    "relationship": "many_to_one",
+    "parent": "customers_joined",
+    "parent_key": ["order_item_id"],
+    "grain": ["order_item_id"],
+    "measure": "line_amount",
+    "sql": "SELECT o.order_id, oi.order_item_id, c.region, oi.quantity * oi.unit_price AS line_amount FROM orders AS o INNER JOIN order_items AS oi ON o.order_id = oi.order_id INNER JOIN customers AS c ON o.customer_id = c.customer_id LEFT JOIN refunds AS r ON o.order_id = r.order_id WHERE o.status = 'completed'"
+  }
+]

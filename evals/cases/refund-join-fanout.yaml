@@ -1,0 +1,36 @@
+id: refund-join-fanout
+skill: verify-grain-and-joins
+summary: A left join to two refunds repeats both line items, so the line amount is summed twice.
+setup_sql: |
+  CREATE TABLE items (
+    order_item_id VARCHAR,
+    order_id VARCHAR,
+    line_amount DECIMAL(12, 2)
+  );
+  CREATE TABLE refunds (refund_id VARCHAR, order_id VARCHAR);
+  INSERT INTO items VALUES
+    ('i1', 'o1', 40.00::DECIMAL(12, 2)),
+    ('i2', 'o1', 60.00::DECIMAL(12, 2));
+  INSERT INTO refunds VALUES ('r1', 'o1'), ('r2', 'o1');
+steps:
+  - name: items
+    relationship: base
+    grain: [order_item_id]
+    measure: line_amount
+    sql: SELECT order_item_id, order_id, line_amount FROM items
+  - name: with_refunds
+    relationship: many_to_one
+    parent: items
+    parent_key: [order_item_id]
+    grain: [order_item_id]
+    measure: line_amount
+    sql: >
+      SELECT i.order_item_id, i.order_id, i.line_amount
+      FROM items AS i
+      LEFT JOIN refunds AS r ON i.order_id = r.order_id
+expect:
+  exit_code: 2
+  finding_codes: [fanout, measure_inflated_by_fanout]
+  min_values:
+    extra_rows: 1
+    extra_revenue: "1"

@@ -1,0 +1,17 @@
+{
+  "name": "data-trust-skills",
+  "description": "A vendor-neutral skill pack for proving a dashboard number is right.",
+  "version": "0.1.0",
+  "owner": {
+    "name": "saliaaa",
+    "url": "https://github.com/saliaaa"
+  },
+  "plugins": [
+    {
+      "name": "data-trust-skills",
+      "source": "./",
+      "description": "Checks that prove a dashboard number is right: grain, reconciliation, time semantics, and metric contracts.",
+      "version": "0.1.0"
+    }
+  ]
+}
