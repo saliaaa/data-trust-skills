@@ -2,7 +2,7 @@
 
 Give your coding agent the checks to prove a dashboard number is right.
 
-A vendor-neutral pack of agent skills for people who ship SQL, models, and dashboards and need evidence that a published number is the number they defined. The skills are `SKILL.md` folders that Claude Code, Cursor, and Codex can read. They sit next to the tools you already use. They do not replace a warehouse, a transformation project, or a semantic layer.
+A vendor-neutral pack of agent skills for people who ship SQL, models, and dashboards and need evidence that a published number is the number they defined. The skills are `SKILL.md` folders that Claude Code, Cursor, and Codex can read. They are an addition to the skills those products publish: they extend them, fill pieces those skills do not cover, and add checks. They are not a competitor and they do not replace a warehouse, a transformation project, or a semantic layer.
 
 ## Why this exists
 
@@ -186,6 +186,8 @@ timezone-day-shift pass
 ```
 
 The [rubric](evals/rubric.md) describes what a written reply should contain. The fixture runner does not call a model.
+
+An optional with-skill versus without-skill benchmark lives in [evals/agent-comparison](evals/agent-comparison/README.md). It is not part of CI. It requires your own agent login. The checked-in result is pending and has no scores.
 
 ## Limitations
 

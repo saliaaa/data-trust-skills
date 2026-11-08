@@ -23,7 +23,7 @@ make demo
 
 ## Evals
 
-`evals/run_evals.py` checks the helper scripts against fixtures. It does not call a model. Do not add a harness that calls a hosted agent.
+`evals/run_evals.py` checks the helper scripts against fixtures. It does not call a model. `evals/agent-comparison/` is an optional benchmark. It is not part of `make ci`, and it runs only when someone supplies their own agent login.
 
 ## Dependencies
 

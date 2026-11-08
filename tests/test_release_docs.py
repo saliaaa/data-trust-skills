@@ -23,7 +23,9 @@ def test_readme_quotes_the_demo_and_every_eval_case():
     assert "not real business data" in readme
     assert "Snowflake" in readme and "Databricks" in readme
     assert "docs/ecosystem.md" in readme
-    assert "agent-comparison" not in readme
+    assert "optional" in readme.lower()
+    assert "your own agent login" in readme
+    assert "not a competitor" in readme
     assert "official" not in readme.lower()
     for path in sorted((ROOT / "evals" / "cases").glob("*.yaml")):
         case_id = yaml.safe_load(path.read_text())["id"]

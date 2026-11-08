@@ -1,0 +1,55 @@
+exit=0
+--- stdout ---
+codex-cli 0.167.0
+
+--- stderr ---
+
+
+--- auth ---
+exit=1
+--- stdout ---
+
+--- stderr ---
+Not logged in
+
+
+--- prompt attempt ---
+exit=1
+--- stdout ---
+
+--- stderr ---
+Reading additional input from stdin...
+OpenAI Codex v0.167.0
+--------
+workdir: /workspace
+model: gpt-6.1-sol
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: none
+reasoning summaries: none
+session id: 01a1bc92-99ff-76d0-839f-a6f468a889be
+--------
+user
+Revenue on this dashboard looks too high. Check the model in examples/broken-revenue-demo. Do not edit files.
+warning: Codex could not find bubblewrap on PATH. Install bubblewrap with your OS package manager. See the sandbox prerequisites: https://developers.openai.com/codex/concepts/sandboxing#prerequisites. Codex will use the bundled bubblewrap in the meantime.
+2026-11-08T19:11:26.825502Z ERROR codex_api::endpoint::responses_websocket: failed to connect to Responses WebSocket stage=Unknown
+2026-11-08T19:11:26.866989Z ERROR codex_api::endpoint::responses_websocket: failed to connect to Responses WebSocket stage=Unknown
+2026-11-08T19:11:27.091952Z ERROR codex_api::endpoint::responses_websocket: failed to connect to Responses WebSocket stage=Unknown
+ERROR: Reconnecting... 2/5
+2026-11-08T19:11:27.531929Z ERROR codex_api::endpoint::responses_websocket: failed to connect to Responses WebSocket stage=Unknown
+ERROR: Reconnecting... 3/5
+2026-11-08T19:11:28.359537Z ERROR codex_api::endpoint::responses_websocket: failed to connect to Responses WebSocket stage=Unknown
+ERROR: Reconnecting... 4/5
+2026-11-08T19:11:29.878853Z ERROR codex_api::endpoint::responses_websocket: failed to connect to Responses WebSocket stage=Unknown
+ERROR: Reconnecting... 5/5
+2026-11-08T19:11:32.978064Z ERROR codex_api::endpoint::responses_websocket: failed to connect to Responses WebSocket stage=Unknown
+warning: Falling back from WebSockets to HTTPS transport. unexpected status 401 Unauthorized: Missing bearer or basic authentication in header, url: wss://api.openai.com/v1/responses, cf-ray: a576e2571dc6a096-PDX
+ERROR: Reconnecting... 1/5
+ERROR: Reconnecting... 2/5
+ERROR: Reconnecting... 3/5
+ERROR: Reconnecting... 4/5
+ERROR: Reconnecting... 5/5
+ERROR: unexpected status 401 Unauthorized: Missing bearer or basic authentication in header, url: https://api.openai.com/v1/responses, cf-ray: a576e286eaa88e6c-PDX, request id: req_13fabdee73164334a98b7e02ea229f24
+ERROR: unexpected status 401 Unauthorized: Missing bearer or basic authentication in header, url: https://api.openai.com/v1/responses, cf-ray: a576e286eaa88e6c-PDX, request id: req_13fabdee73164334a98b7e02ea229f24
+
