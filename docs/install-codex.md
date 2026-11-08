@@ -1,6 +1,6 @@
 # Install in Codex
 
-Codex reads `SKILL.md` directories from `.agents/skills/` in the repository and from `$HOME/.agents/skills/`. The current Build skills documentation also says symlinked skill folders are followed. This was read from that documentation. Codex was not started against this repo for this release.
+Codex reads `SKILL.md` directories from `.agents/skills/` in the repository and from `$HOME/.agents/skills/`. The current Build skills documentation also says symlinked skill folders are followed. This was read from that documentation. On 2026-11-08 Codex CLI 0.167.0 was installed in the release environment. `codex login status` printed `Not logged in`. The skill trigger was not run (no credentials).
 
 This repo keeps the only copy under [`skills/`](../skills/verify-grain-and-joins/SKILL.md). From a checkout, a symlink is the install, not a second copy:
 

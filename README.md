@@ -4,9 +4,9 @@ Give your coding agent the checks to prove a dashboard number is right.
 
 A vendor-neutral pack of agent skills for people who ship SQL, models, and dashboards and need evidence that a published number is the number they defined. The skills are `SKILL.md` folders that Claude Code, Cursor, and Codex can read. They sit next to the tools you already use. They do not replace a warehouse, a transformation project, or a semantic layer.
 
-![Playback of make demo. The visible totals are buggy 3377.50, correct 3152.50, and inflation 225.00.](docs/assets/demo.gif)
+![Playback of make demo on a seeded synthetic dataset, not real business data. The visible totals are buggy 3377.50, correct 3152.50, and inflation 225.00.](docs/assets/demo.gif)
 
-The image is a line-by-line playback of the `make demo` output captured for this release, so the scroll stays readable. The figures in it are that command's output.
+The image is a line-by-line playback of the `make demo` output captured for this release, so the scroll stays readable. Those figures come from a seeded synthetic dataset (seed 20260315). They are not real business data.
 
 ## Quick start
 
@@ -17,13 +17,13 @@ uv sync
 make demo
 ```
 
-`make demo` builds a synthetic shop in memory, runs the buggy revenue model and the corrected one, and prints the inflation and the two root causes. It does not ask for credentials and it does not call a network service.
+`make demo` builds a seeded synthetic shop in memory, runs the buggy revenue model and the corrected one, and prints the inflation and the two root causes. The printed figures are not real business data. It does not ask for credentials and it does not call a network service.
 
 Install notes for each client: [Claude Code](docs/install-claude-code.md), [Cursor](docs/install-cursor.md), [Codex](docs/install-codex.md).
 
 ## Sample
 
-The input model is [`examples/broken-revenue-demo/models/buggy_revenue.sql`](examples/broken-revenue-demo/models/buggy_revenue.sql). It groups completed-order line amounts by UTC date and region, and it left-joins refunds before the sum. The reference model and the contract live beside it. The generator seed is `20260315`.
+The input model is [`examples/broken-revenue-demo/models/buggy_revenue.sql`](examples/broken-revenue-demo/models/buggy_revenue.sql). It groups completed-order line amounts by UTC date and region, and it left-joins refunds before the sum. The reference model and the contract live beside it. The generator seed is `20260315`. Every figure below comes from that seeded synthetic dataset and is not real business data.
 
 This is the output of `make demo` on DuckDB 2.0.0:
 
@@ -146,7 +146,7 @@ One `skills/` directory is the source. Claude Code reads it through the plugin m
 
 ## Results
 
-`make demo` produced the totals above: buggy `3377.50`, correct `3152.50`, inflation `225.00`, day-level movement `105.50`.
+`make demo` produced the totals above from the seeded synthetic dataset, not from real business data: buggy `3377.50`, correct `3152.50`, inflation `225.00`, day-level movement `105.50`.
 
 `uv run python evals/run_evals.py` checks the helper scripts against ten broken fixtures. It does not call a model. This is the output from this release:
 
@@ -164,7 +164,7 @@ timezone-day-shift pass
 10 passed, 0 failed
 ```
 
-The [rubric](evals/rubric.md) says how a future agent reply should be scored. With-skill versus without-skill agent comparisons were not run.
+The [rubric](evals/rubric.md) says how a future agent reply should be scored. The harness is [evals/agent-comparison/](evals/agent-comparison/README.md). With-skill versus without-skill agent comparisons were not run: every client CLI installed here stopped at login, so the result file is pending and has no scores.
 
 ## Limitations
 
@@ -175,7 +175,7 @@ The [rubric](evals/rubric.md) says how a future agent reply should be scored. Wi
 - dbt projects, Snowflake worksheets, and dashboard products were not invoked. The questions apply to SQL from those tools; this release only ran DuckDB.
 - CI checks relative links. It does not re-fetch documentation URLs.
 - GitHub's hosted secret scanning is a repository setting. This repo runs gitleaks 8.30.1 in CI instead of changing that setting.
-- There is no terminal recording yet. See the note at the top.
+- The gif at the top is a line-by-line playback of captured `make demo` output, not a hand-typed session.
 
 ## Compatibility
 
@@ -184,11 +184,11 @@ Checked in this release means a file or a command that was actually run here. A 
 | Check | Claude Code | Cursor | Codex |
 | --- | --- | --- | --- |
 | `SKILL.md` name, description, and relative links validated | yes | yes | yes |
-| Install steps written from public docs | yes | yes | yes |
-| Install command executed in that product | no | no | no |
-| Live session that loaded a skill | no | no | no |
+| CLI binary started in this environment | yes, 2.1.319 | yes, cursor-agent 2026.11.05-86047df | yes, codex-cli 0.167.0 |
+| Logged in | no | no | no |
+| Live skill trigger | not run (no credentials) | not run (no credentials) | not run (no credentials) |
 
-Cursor's rule file is in the tree and matches the documented frontmatter (`description` set, `alwaysApply: false`, no `globs`). That file check is not a live session.
+Cursor's rule file is in the tree and matches the documented frontmatter (`description` set, `alwaysApply: false`, no `globs`). That file check is not a live session. The prompt used for the trigger attempt was: "Revenue on this dashboard looks too high. Check the model in examples/broken-revenue-demo." Raw transcripts are in [evals/agent-comparison/transcripts/](evals/agent-comparison/transcripts/cursor-agent-probe.txt).
 
 ## Contributing
 
@@ -204,7 +204,7 @@ Not in this release:
 - `verify-semantic-parity` — compare a semantic-layer metric with the warehouse SQL it claims to match.
 - `qa-dashboard-behavior` — check filters, totals, and drill paths on a dashboard.
 - `assess-change-impact` — list published metrics a schema or model change can move.
-- A with-skill versus without-skill agent comparison, scored with the rubric. Those comparisons were not run.
+- A with-skill versus without-skill agent comparison, scored with the rubric. The harness is in the tree. Those comparisons were not run.
 
 ## License
 
