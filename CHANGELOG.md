@@ -7,4 +7,5 @@
 - Fixture evals that run the helper scripts and check the diagnosis.
 - CI that validates `SKILL.md` files, runs pytest, runs the evals, and scans history with gitleaks 8.30.1.
 - Warehouse notes for Snowflake and Databricks. The executed demo stays on local DuckDB.
-- A link-only map of related dbt, Snowflake, Databricks, and Omni projects in `docs/ecosystem.md`.
+- A link-only map of related dbt, Snowflake, Databricks, and Omni projects in `docs/ecosystem.md`. These skills add to those projects. They do not replace them.
+- Optional agent-comparison harness. It is not part of CI and runs only with your own agent login.

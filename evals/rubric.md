@@ -2,7 +2,7 @@
 
 The runner in [run_evals.py](run_evals.py) does not score a model. It checks that each helper script reports the defect in the matching fixture. One of those fixtures is [refund-join-fanout.yaml](cases/refund-join-fanout.yaml).
 
-A written reply that follows a skill should still meet all of the following:
+The optional benchmark in [agent-comparison](agent-comparison/README.md) is separate. CI does not run it. It needs your own agent login. A written reply that follows a skill should still meet all of the following:
 
 1. Evidence is numeric and comes from a query result or a contract file.
 2. Assumptions are labeled as assumptions.
