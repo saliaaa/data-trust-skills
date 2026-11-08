@@ -1,0 +1,22 @@
+id: late-arrivals
+skill: test-time-semantics
+summary: An event from January 1 was loaded on January 10, after the January 5 snapshot and outside a 48 hour delay.
+setup_sql: |
+  CREATE TABLE events (event_at TIMESTAMP, loaded_at TIMESTAMP);
+  INSERT INTO events VALUES (
+    TIMESTAMP '2024-01-01 00:00:00',
+    TIMESTAMP '2024-01-10 00:00:00'
+  );
+source_sql: SELECT event_at, loaded_at FROM events
+arguments:
+  timestamp_column: event_at
+  event_column: event_at
+  loaded_column: loaded_at
+  as_of: "2024-01-05 00:00:00"
+  max_delay_hours: 48
+expect:
+  exit_code: 2
+  finding_codes: [late_arrival]
+  min_values:
+    missing_from_snapshot: 1
+    beyond_delay: 1

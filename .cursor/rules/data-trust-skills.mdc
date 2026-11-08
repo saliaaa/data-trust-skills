@@ -1,0 +1,13 @@
+---
+description: "Use data-trust-skills when a warehouse or dashboard number needs evidence: grain, reconciliation, time, or a metric contract."
+alwaysApply: false
+---
+
+When the task is to prove a number, read the one matching skill under `skills/` and follow it. Do not copy the skill folders into another directory.
+
+- Candidate keys, join fanout, dropped rows, or mixed grain: `skills/verify-grain-and-joins/SKILL.md`
+- Two calculations of one metric disagree: `skills/reconcile-metric-values/SKILL.md`
+- Timezones, daylight saving, period ends, late rows, or fiscal years: `skills/test-time-semantics/SKILL.md`
+- Write or review a metric contract: `skills/define-metric-contract/SKILL.md`
+
+Stay on the read-only path. Do not invent an owner or a tolerance. Separate evidence, assumptions, and unknowns.

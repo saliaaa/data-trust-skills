@@ -1,0 +1,25 @@
+id: mixed-grain
+skill: verify-grain-and-joins
+summary: Detail rows keyed by order item are stacked with daily header rows in one table.
+setup_sql: |
+  CREATE TABLE stacked (
+    order_item_id VARCHAR,
+    sales_date DATE,
+    amount DECIMAL(12, 2)
+  );
+  INSERT INTO stacked VALUES
+    ('i1', DATE '2024-01-01', 10.00::DECIMAL(12, 2)),
+    ('i2', DATE '2024-01-01', 15.00::DECIMAL(12, 2)),
+    (NULL, DATE '2024-01-01', 100.00::DECIMAL(12, 2)),
+    (NULL, DATE '2024-01-02', 80.00::DECIMAL(12, 2));
+mixed:
+  source_sql: SELECT order_item_id, sales_date, amount FROM stacked
+  detail_column: order_item_id
+  fine_key: [order_item_id]
+  coarse_key: [sales_date]
+expect:
+  exit_code: 2
+  finding_codes: [mixed_grain]
+  min_values:
+    detail_rows: 2
+    header_rows: 2

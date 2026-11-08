@@ -1,0 +1,22 @@
+id: inclusive-period-end
+skill: test-time-semantics
+summary: A row exactly at the period end is inside a closed bound and outside a half-open bound.
+setup_sql: |
+  CREATE TABLE events (ts TIMESTAMP);
+  INSERT INTO events VALUES
+    (TIMESTAMP '2024-01-15 12:00:00'),
+    (TIMESTAMP '2024-02-01 00:00:00');
+source_sql: SELECT ts FROM events
+arguments:
+  timestamp_column: ts
+  period_start: "2024-01-01 00:00:00"
+  period_end: "2024-02-01 00:00:00"
+  declared_boundary: "[start, end]"
+expect:
+  exit_code: 2
+  finding_codes: [boundary_endpoint]
+  min_values:
+    on_endpoint: 1
+    closed_includes: 2
+  equals:
+    half_open_includes: 1

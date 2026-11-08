@@ -1,0 +1,27 @@
+id: dropped-inner-join
+skill: verify-grain-and-joins
+summary: An inner join to customers drops order o2 because that customer key is absent.
+setup_sql: |
+  CREATE TABLE orders (order_id VARCHAR);
+  CREATE TABLE customers (customer_id VARCHAR);
+  INSERT INTO orders VALUES ('o1'), ('o2');
+  INSERT INTO customers VALUES ('o1');
+steps:
+  - name: orders
+    relationship: base
+    grain: [order_id]
+    sql: SELECT order_id FROM orders
+  - name: with_customer
+    relationship: many_to_one
+    parent: orders
+    parent_key: [order_id]
+    grain: [order_id]
+    sql: >
+      SELECT o.order_id
+      FROM orders AS o
+      INNER JOIN customers AS c ON o.order_id = c.customer_id
+expect:
+  exit_code: 2
+  finding_codes: [dropped_rows]
+  min_values:
+    dropped_keys: 1
