@@ -23,7 +23,7 @@ make demo
 
 ## Evals
 
-`evals/run_evals.py` checks the helper scripts against fixtures. It does not call a model. Do not describe its result as a model benchmark. The with-skill versus without-skill comparison is a roadmap item until someone actually runs it.
+`evals/run_evals.py` checks the helper scripts against fixtures. It does not call a model. Do not add a harness that calls a hosted agent.
 
 ## Dependencies
 

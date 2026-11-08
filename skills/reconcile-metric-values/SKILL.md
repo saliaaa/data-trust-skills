@@ -72,6 +72,24 @@ Which side is the reference. Whether duplicate keys were summed. That matching r
 
 Keys you could not align, a relative tolerance you could not evaluate, and any slice you did not request.
 
+## Warehouse dialects
+
+The helper script runs on DuckDB, which is the local stand-in. To compare a table with an earlier copy, point the two SELECT statements at a time-travel read. Do not issue a write.
+
+Snowflake:
+
+```sql
+SELECT * FROM revenue AT(TIMESTAMP => '2024-06-01 00:00:00'::TIMESTAMP_TZ)
+SELECT * FROM revenue BEFORE(STATEMENT => '<query_id>')
+```
+
+Databricks SQL, for a Delta table:
+
+```sql
+SELECT * FROM revenue TIMESTAMP AS OF '2024-06-01T00:00:00.000Z'
+SELECT * FROM revenue VERSION AS OF 12
+```
+
 ## Query budget
 
 The default budget is 20 statements. The database file is opened read-only. The helper rejects a statement that is not a single `SELECT` or `WITH`. Use a warehouse role that cannot write when the file is not DuckDB; the keyword filter is only a local guard.

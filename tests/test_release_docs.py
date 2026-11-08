@@ -20,7 +20,10 @@ def test_readme_quotes_the_demo_and_every_eval_case():
     assert f"correct: {money(result['totals']['correct'])}" in readme
     assert f"inflation: {money(result['totals']['inflation'])}" in readme
     assert f"revenue on shifted rows: {money(result['time']['evidence']['shifted_measure'])}" in readme
-    assert "were not run" in readme
+    assert "not real business data" in readme
+    assert "Snowflake" in readme and "Databricks" in readme
+    assert "docs/ecosystem.md" in readme
+    assert "agent-comparison" not in readme
     assert "official" not in readme.lower()
     for path in sorted((ROOT / "evals" / "cases").glob("*.yaml")):
         case_id = yaml.safe_load(path.read_text())["id"]

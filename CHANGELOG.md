@@ -6,4 +6,5 @@
 - Synthetic broken-revenue demo on local DuckDB, with a seeded generator.
 - Fixture evals that run the helper scripts and check the diagnosis.
 - CI that validates `SKILL.md` files, runs pytest, runs the evals, and scans history with gitleaks 8.30.1.
-- Agent-comparison harness. The 2026-11-08 probe is pending: Cursor, Claude Code, and Codex were installed and were not logged in.
+- Warehouse notes for Snowflake and Databricks. The executed demo stays on local DuckDB.
+- A link-only map of related dbt, Snowflake, Databricks, and Omni projects in `docs/ecosystem.md`.

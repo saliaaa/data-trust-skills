@@ -68,6 +68,10 @@ A null denominator means "not a ratio." An empty exclusion list means the popula
 
 Whether any query, model, or dashboard implements the contract. That stays unknown until the other checks run.
 
+## Warehouse dialects
+
+The contract names the business timezone and the timestamp type. It does not embed a vendor function. On Snowflake, say whether the stored column is `TIMESTAMP_NTZ`, `TIMESTAMP_LTZ`, or `TIMESTAMP_TZ`. On Databricks, say whether it is `timestamp` or `timestamp_ntz`. The time skill then picks `CONVERT_TIMEZONE` or `from_utc_timestamp` / `to_utc_timestamp`. The DuckDB demo is only a local stand-in for that contract.
+
 ## Query budget
 
 Validation issues no SQL. The budget is 0. Do not connect to a warehouse as part of this skill.
