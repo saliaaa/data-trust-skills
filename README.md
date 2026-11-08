@@ -4,6 +4,27 @@ Give your coding agent the checks to prove a dashboard number is right.
 
 A vendor-neutral pack of agent skills for people who ship SQL, models, and dashboards and need evidence that a published number is the number they defined. The skills are `SKILL.md` folders that Claude Code, Cursor, and Codex can read. They sit next to the tools you already use. They do not replace a warehouse, a transformation project, or a semantic layer.
 
+## Why this exists
+
+A dashboard number can be wrong while the pipeline is green. These skills give a coding agent the checks that show why.
+
+- Data engineers use them when a join fans out or an incremental result does not match a full rebuild.
+- Analytics engineers use them to check a dbt model against a written metric contract.
+- Data scientists and analysts use them when the table they are about to use has to be trustworthy.
+
+## Works with
+
+Snowflake and Databricks are the warehouses these checks are written for. A dbt model or a BI query is in scope when it runs as SQL on one of those warehouses.
+
+- Snowflake, including time travel and `CONVERT_TIMEZONE`
+- Databricks SQL and Spark, including Delta time travel and `MERGE`
+- dbt, as the project that builds the model
+- BI tools, as the surface that publishes the number
+
+`make demo` uses DuckDB only, as a local stand-in, so it runs with no warehouse account. The figures in the recording and in the sample below come from a seeded synthetic dataset (seed 20260315). They are not real business data.
+
+Related projects, linked and not copied, are mapped in [docs/ecosystem.md](docs/ecosystem.md).
+
 ![Playback of make demo on a seeded synthetic dataset, not real business data. The visible totals are buggy 3377.50, correct 3152.50, and inflation 225.00.](docs/assets/demo.gif)
 
 The image is a line-by-line playback of the `make demo` output captured for this release, so the scroll stays readable. Those figures come from a seeded synthetic dataset (seed 20260315). They are not real business data.
@@ -17,7 +38,7 @@ uv sync
 make demo
 ```
 
-`make demo` builds a seeded synthetic shop in memory, runs the buggy revenue model and the corrected one, and prints the inflation and the two root causes. The printed figures are not real business data. It does not ask for credentials and it does not call a network service.
+`make demo` builds a seeded synthetic shop in memory, runs the buggy revenue model and the corrected one, and prints the inflation and the two root causes. The printed figures are not real business data. It does not connect to a warehouse or the network.
 
 Install notes for each client: [Claude Code](docs/install-claude-code.md), [Cursor](docs/install-cursor.md), [Codex](docs/install-codex.md).
 
@@ -164,31 +185,31 @@ timezone-day-shift pass
 10 passed, 0 failed
 ```
 
-The [rubric](evals/rubric.md) says how a future agent reply should be scored. The harness is [evals/agent-comparison/](evals/agent-comparison/README.md). With-skill versus without-skill agent comparisons were not run: every client CLI installed here stopped at login, so the result file is pending and has no scores.
+The [rubric](evals/rubric.md) describes what a written reply should contain. The fixture runner does not call a model.
 
 ## Limitations
 
 - The grain helper does not parse a query into a join graph. You pass the steps.
-- Time conversions were executed on DuckDB 2.0.0. A `timestamptz` column is not a supported storage mode. Another engine can treat `AT TIME ZONE` differently.
+- The helper scripts were executed on DuckDB 2.0.0. Snowflake and Databricks notes name functions for the agent to use in read-only SQL. Those notes were not executed against a Snowflake or Databricks account.
+- DuckDB `timestamptz` is not a supported storage mode in the helper.
 - The read-only guard is a keyword filter. It is not a database privilege.
 - Copying a single `SKILL.md` out of the repo does not bring a working helper. The scripts import `src/data_trust`.
-- dbt projects, Snowflake worksheets, and dashboard products were not invoked. The questions apply to SQL from those tools; this release only ran DuckDB.
+- No dbt project, Snowflake worksheet, or Databricks workspace was invoked while preparing this repo. The demo is the DuckDB stand-in.
 - CI checks relative links. It does not re-fetch documentation URLs.
 - GitHub's hosted secret scanning is a repository setting. This repo runs gitleaks 8.30.1 in CI instead of changing that setting.
 - The gif at the top is a line-by-line playback of captured `make demo` output, not a hand-typed session.
 
 ## Compatibility
 
-Checked in this release means a file or a command that was actually run here. A product session means opening that product and loading the skill.
+Checked in this release means a file or a command that was actually run here.
 
 | Check | Claude Code | Cursor | Codex |
 | --- | --- | --- | --- |
 | `SKILL.md` name, description, and relative links validated | yes | yes | yes |
-| CLI binary started in this environment | yes, 2.1.319 | yes, cursor-agent 2026.11.05-86047df | yes, codex-cli 0.167.0 |
-| Logged in | no | no | no |
-| Live skill trigger | not run (no credentials) | not run (no credentials) | not run (no credentials) |
+| Install notes written from public docs | yes | yes | yes |
+| Live session that loaded a skill | no | no | no |
 
-Cursor's rule file is in the tree and matches the documented frontmatter (`description` set, `alwaysApply: false`, no `globs`). That file check is not a live session. The prompt used for the trigger attempt was: "Revenue on this dashboard looks too high. Check the model in examples/broken-revenue-demo." Raw transcripts are in [evals/agent-comparison/transcripts/](evals/agent-comparison/transcripts/cursor-agent-probe.txt).
+Cursor's rule file is in the tree and matches the documented frontmatter (`description` set, `alwaysApply: false`, no `globs`). That file check is not a live session. Snowflake and Databricks SQL was not executed here. The dialect notes are for the agent to apply when it has a warehouse connection of its own.
 
 ## Contributing
 
@@ -204,12 +225,11 @@ Not in this release:
 - `verify-semantic-parity` — compare a semantic-layer metric with the warehouse SQL it claims to match.
 - `qa-dashboard-behavior` — check filters, totals, and drill paths on a dashboard.
 - `assess-change-impact` — list published metrics a schema or model change can move.
-- A with-skill versus without-skill agent comparison, scored with the rubric. The harness is in the tree. Those comparisons were not run.
 
 ## License
 
 [MIT](LICENSE).
 
-dbt, Snowflake, DuckDB, and the other product names in these notes are trademarks of their owners. This is an independent project.
+Snowflake, Databricks, dbt, DuckDB, Omni, and the other product names in these notes are trademarks of their owners. This project works with those products and is not endorsed by their owners.
 
 Author: [saliaaa](https://github.com/saliaaa) · [@levan_salia](https://x.com/levan_salia)

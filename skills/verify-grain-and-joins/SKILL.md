@@ -73,6 +73,20 @@ The relationship labels you supplied. A `one_to_many` label allows the row count
 
 Null grain keys, a measure that is not constant across copies, and any step you did not run.
 
+## Warehouse dialects
+
+The helper script runs on DuckDB. That demo is a local stand-in, not a connection to Snowflake or Databricks. On those warehouses, keep the same read-only question and translate the SELECT.
+
+Snowflake can return only the repeated keys with `QUALIFY`:
+
+```sql
+SELECT *
+FROM joined
+QUALIFY COUNT(*) OVER (PARTITION BY order_item_id) > 1
+```
+
+A grouped `HAVING COUNT(*) > 1` works in both Snowflake and Databricks SQL. On Databricks, incremental models often write with `MERGE INTO ... USING ... ON ... WHEN MATCHED THEN UPDATE ... WHEN NOT MATCHED THEN INSERT ...`. Check the grain before that merge and the grain of the table after it. Do not run `MERGE` from this skill.
+
 ## Query budget
 
 The default budget is 30 statements. The helper opens the file read-only and rejects anything other than a single `SELECT` or `WITH`. That keyword filter is not a privilege. Use a database role that cannot write.

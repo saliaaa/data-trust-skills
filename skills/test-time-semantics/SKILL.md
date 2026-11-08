@@ -77,6 +77,14 @@ Storage mode, the DuckDB `AT TIME ZONE` behavior, the half-open or closed conven
 
 A missing measure, a window that was too wide to scan, and any check you did not run.
 
+## Warehouse dialects
+
+The helper's conversions were executed with DuckDB `AT TIME ZONE`. DuckDB is the local stand-in. Use the warehouse functions below in the SELECT you ask the helper, or in the SQL you run yourself. Do not assume the three engines agree.
+
+Snowflake `TIMESTAMP_NTZ` is a civil time with no zone. `TIMESTAMP_LTZ` is shown in the session time zone. `TIMESTAMP_TZ` keeps the offset stored with the value. `CONVERT_TIMEZONE('UTC', 'America/New_York', ordered_at_ntz)` turns a `TIMESTAMP_NTZ` that means UTC into another zone. `CONVERT_TIMEZONE('America/New_York', ordered_at_tz)` takes a `TIMESTAMP_TZ` or `TIMESTAMP_LTZ` and returns the clock in the target zone.
+
+Databricks `timestamp` is shown in the session time zone. `timestamp_ntz` is a civil time with no zone. `to_utc_timestamp(ts, zone)` treats `ts` as a clock in `zone` and shifts it to UTC. `from_utc_timestamp(ts, zone)` treats `ts` as UTC and shifts the clock to `zone`.
+
 ## Query budget
 
 The default budget is 25 statements. The file is opened read-only. Passing `--budget` higher is allowed only to finish a scan you already started, and the reply must say so.
