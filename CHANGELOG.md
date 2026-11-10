@@ -9,3 +9,4 @@
 - Warehouse notes for Snowflake and Databricks. The executed demo stays on local DuckDB.
 - A link-only map of related dbt, Snowflake, Databricks, and Omni projects in `docs/ecosystem.md`. These skills add to those projects. They do not replace them.
 - Optional agent-comparison harness. It is not part of CI and runs only with your own agent login.
+- Each skill carries its own Snowflake and Databricks check SQL. `scripts/install.sh` copies the skills into `.cursor/skills/`, `.claude/skills/`, or `.agents/skills/`.

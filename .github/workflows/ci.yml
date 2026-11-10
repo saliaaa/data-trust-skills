@@ -20,6 +20,17 @@ jobs:
       - run: uv run pytest
       - run: uv run python evals/run_evals.py
 
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install into a temp project
+        run: |
+          bash scripts/install.sh --cursor /tmp/dt-install
+          bash scripts/install.sh --claude /tmp/dt-install
+          bash scripts/install.sh --codex /tmp/dt-install
+          python3 scripts/check_installed_skills.py /tmp/dt-install
+
   gitleaks:
     runs-on: ubuntu-latest
     steps:

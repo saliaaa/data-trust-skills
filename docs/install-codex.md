@@ -1,15 +1,18 @@
 # Install in Codex
 
-Codex reads `SKILL.md` directories from `.agents/skills/` in the repository and from `$HOME/.agents/skills/`. The current Build skills documentation also says symlinked skill folders are followed. This was read from that documentation. Codex was not started against this repo for this release.
+Codex reads `.agents/skills/<name>/SKILL.md` in the project and `$HOME/.agents/skills/` for the user. Symlinked skill folders are followed. This was read from the Build skills documentation. Codex was not started against this repo for this release.
 
-This repo keeps the only copy under [`skills/`](../skills/verify-grain-and-joins/SKILL.md). From a checkout, a symlink is the install, not a second copy:
+From a clone of this repo, in the dbt project:
+
+```bash
+bash /path/to/data-trust-skills/scripts/install.sh --codex .
+```
+
+That copies the four skill folders into `.agents/skills/`. A plain copy is the same:
 
 ```bash
 mkdir -p .agents/skills
-ln -s ../../skills/verify-grain-and-joins .agents/skills/verify-grain-and-joins
-ln -s ../../skills/reconcile-metric-values .agents/skills/reconcile-metric-values
-ln -s ../../skills/test-time-semantics .agents/skills/test-time-semantics
-ln -s ../../skills/define-metric-contract .agents/skills/define-metric-contract
+cp -R /path/to/data-trust-skills/skills/* .agents/skills/
 ```
 
-Those links are not committed. Create them in the checkout where you want Codex to see the skills. The helper commands still expect that checkout to be the working directory, because the scripts import the shared library under `src/`.
+The check SQL is inside each skill. The Python scripts are optional and are not required in the dbt project.

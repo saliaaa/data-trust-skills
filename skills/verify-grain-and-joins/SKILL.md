@@ -32,22 +32,13 @@ Stop and ask if the grain is missing. Do not guess it from a column name.
 ## Workflow
 
 1. Restate the grain in one sentence: "one row per `order_item_id` before the daily sum."
-2. Run the helper. Default command, from the repo root:
+2. Run the statements in [references/checks.md](references/checks.md). Pick the Snowflake block or the Databricks block. Use `dbt show --inline`, the warehouse SQL editor, or a dbt MCP SQL tool that is already connected.
+3. Read null keys and duplicate keys before the join story.
+4. Treat a repeated grain key as fanout. A `one_to_many` label does not excuse it. Quote `multiplied_amount - deduped_amount` when the check returns both sums.
+5. Treat parent keys that disappear as dropped rows.
+6. Put one counterexample key in the reply whenever a finding exists.
 
-```bash
-uv run python skills/verify-grain-and-joins/scripts/check_grain.py \
-  --db warehouse.duckdb \
-  --steps steps.json
-```
-
-3. Read `key_nulls` and `key_not_unique` before reading the join story. A bad key makes the later counts ambiguous.
-4. Treat `fanout` as a repeated grain key, or as a step labeled `one_to_one` or `many_to_one` whose row count still grew.
-5. Treat `dropped_rows` as parent keys that do not survive the step.
-6. If `measure_inflated_by_fanout` is present, the sum is larger than one copy of the measure per grain key. Quote that difference.
-7. For a table that unions a summary grain and a detail grain, pass `--mixed` instead of pretending one key fits every row.
-8. Put one counterexample key in the reply whenever a finding exists. The helper's `example` field is that key.
-
-Details and the JSON shapes are in [references/method.md](references/method.md). A worked fanout path is [join_steps.json](../../examples/broken-revenue-demo/join_steps.json).
+Details are in [references/method.md](references/method.md). The script in `scripts/check_grain.py` is an optional DuckDB extra for the demo repo. A dbt project does not need it.
 
 ## Stop conditions
 
@@ -75,17 +66,7 @@ Null grain keys, a measure that is not constant across copies, and any step you 
 
 ## Warehouse dialects
 
-The helper script runs on DuckDB. That demo is a local stand-in, not a connection to Snowflake or Databricks. On those warehouses, keep the same read-only question and translate the SELECT.
-
-Snowflake can return only the repeated keys with `QUALIFY`:
-
-```sql
-SELECT *
-FROM joined
-QUALIFY COUNT(*) OVER (PARTITION BY order_item_id) > 1
-```
-
-A grouped `HAVING COUNT(*) > 1` works in both Snowflake and Databricks SQL. On Databricks, incremental models often write with `MERGE INTO ... USING ... ON ... WHEN MATCHED THEN UPDATE ... WHEN NOT MATCHED THEN INSERT ...`. Check the grain before that merge and the grain of the table after it. Do not run `MERGE` from this skill.
+Snowflake and Databricks statements are in [references/checks.md](references/checks.md). Snowflake uses `QUALIFY` to keep repeated keys. Databricks uses `HAVING`. Do not run `MERGE`. On Databricks, compare the grain before a `MERGE` the user already ran with the grain of the table after it.
 
 ## Query budget
 

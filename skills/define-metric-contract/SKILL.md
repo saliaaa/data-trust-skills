@@ -37,15 +37,9 @@ Write the file only after the user has asked for a file and has confirmed the ow
 ## Workflow
 
 1. Collect the required fields. Stop on owner or tolerance rather than guessing.
-2. Draft the YAML. Field rules and a pointer to a filled-in example are in [references/fields.md](references/fields.md).
-3. Validate:
-
-```bash
-uv run python skills/define-metric-contract/scripts/validate_contract.py \
-  --contract path/to/metric.contract.yaml
-```
-
-4. If the helper returns `contract_invalid`, fix the file or ask. Do not treat a failed file as a contract.
+2. Draft the YAML from [references/fields.md](references/fields.md). A synthetic example is [references/example.contract.yaml](references/example.contract.yaml).
+3. Check every required field in that reference. The optional script `scripts/validate_contract.py` does the same check for the demo repo. A dbt project does not need it.
+4. If you need a row count for the population, run the statement in [references/checks.md](references/checks.md) with `dbt show --inline`, the warehouse SQL editor, or a dbt MCP SQL tool that is already connected.
 5. Tell the user that a valid file still does not prove a query implements it.
 
 ## Stop conditions
@@ -70,7 +64,7 @@ Whether any query, model, or dashboard implements the contract. That stays unkno
 
 ## Warehouse dialects
 
-The contract names the business timezone and the timestamp type. It does not embed a vendor function. On Snowflake, say whether the stored column is `TIMESTAMP_NTZ`, `TIMESTAMP_LTZ`, or `TIMESTAMP_TZ`. On Databricks, say whether it is `timestamp` or `timestamp_ntz`. The time skill then picks `CONVERT_TIMEZONE` or `from_utc_timestamp` / `to_utc_timestamp`. The DuckDB demo is only a local stand-in for that contract.
+The contract names the type. It does not embed a vendor function. Snowflake: `TIMESTAMP_NTZ`, `TIMESTAMP_LTZ`, or `TIMESTAMP_TZ`. Databricks: `timestamp` or `timestamp_ntz`. The population count for either warehouse is in [references/checks.md](references/checks.md).
 
 ## Query budget
 

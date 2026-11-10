@@ -1,15 +1,20 @@
 # Install in Cursor
 
-Cursor project rules live in [`.cursor/rules/`](../.cursor/rules/data-trust-skills.mdc). The rule in this repo sets `alwaysApply: false` and a description, and it does not set `globs`. That is the "apply intelligently" shape in the Cursor rules docs: the agent can pull the rule in when the description matches.
+Cursor loads project skills from `.cursor/skills/` and `.agents/skills/`. It loads user-level skills from `~/.cursor/skills/` and `~/.agents/skills/`. For compatibility it also reads `.claude/skills/`, `.codex/skills/`, `~/.claude/skills/`, and `~/.codex/skills/`. Each skill is a folder with `SKILL.md`. This matches the skill directories in the Cursor docs.
 
-The rule points at the canonical [`skills/`](../skills/verify-grain-and-joins/SKILL.md) folder. Cursor's skill loader looks in `.cursor/skills/`, `.agents/skills/`, and a few compatibility directories. It does not scan a top-level `skills/` directory. This repo does not copy the skills into those directories.
+This repo's canonical copy stays in `skills/`. The installer copies those folders into the directory Cursor actually scans. The check SQL is inside each skill. The Python scripts are optional.
 
-Opening this repo is the setup that was written down. A separate Cursor session that loads the rule was not run for this release.
-
-To point another project at a clone without copying the files:
+From a clone, in the dbt project:
 
 ```bash
-mkdir -p .cursor/rules
-# Write a short rule whose body names the absolute path of each SKILL.md
-# in the clone. Keep the canonical files where they are.
+bash /path/to/data-trust-skills/scripts/install.sh --cursor .
 ```
+
+That writes `.cursor/skills/<skill-name>/SKILL.md`. Plain copy does the same:
+
+```bash
+mkdir -p .cursor/skills
+cp -R /path/to/data-trust-skills/skills/* .cursor/skills/
+```
+
+The rule in [`.cursor/rules/data-trust-skills.mdc`](../.cursor/rules/data-trust-skills.mdc) is for people who open this repo itself. `alwaysApply` is false, a description is set, and there are no globs. A separate Cursor session that loads the skills was not run for this release.

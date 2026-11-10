@@ -53,6 +53,34 @@ reconcile calendar days, deduped UTC date minus America/New_York date
     2024-07-04: utc 10.00 business 0.00 difference 10.00
 ```
 
+## Install
+
+Cursor, from the dbt project root. This copies the four skill folders into `.cursor/skills/`, which is where Cursor loads project skills. No key.
+
+```bash
+git clone https://github.com/saliaaa/data-trust-skills.git
+bash data-trust-skills/scripts/install.sh --cursor .
+```
+
+After this repo is on the default branch, the same script can be fetched without a clone:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/saliaaa/data-trust-skills/main/scripts/install.sh | bash -s -- --cursor .
+```
+
+Claude Code. After this repo is on the default branch:
+
+```bash
+claude plugin marketplace add saliaaa/data-trust-skills
+claude plugin install data-trust-skills@data-trust-skills
+```
+
+From a checkout today, the same CLI commands with a local path were the ones that succeeded. See [Claude Code](docs/install-claude-code.md).
+
+Codex uses `.agents/skills/`: `bash data-trust-skills/scripts/install.sh --codex .`
+
+User-level copies, on your machine only, use the same folders under your home directory: `~/.cursor/skills/`, `~/.agents/skills/`, `~/.claude/skills/`, and `~/.codex/skills/`. Cursor also reads `.claude/skills/` and `.codex/skills/` in a project. Details: [Cursor](docs/install-cursor.md), [Claude Code](docs/install-claude-code.md), [Codex](docs/install-codex.md).
+
 ## Quick start
 
 Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then:
@@ -180,7 +208,7 @@ flowchart LR
   library --> report
 ```
 
-One `skills/` directory is the source. Claude Code reads it through the plugin manifest. Cursor is pointed at it by a rule. Codex sees it only after a symlink into `.agents/skills/`. The helpers share a small Python library and refuse SQL that is not a single `SELECT` or `WITH`.
+One `skills/` directory is the source. `scripts/install.sh` copies those folders into the directory Cursor, Claude Code, or Codex scans. The check SQL is inside each skill. The Python helpers are an optional DuckDB extra and refuse SQL that is not a single `SELECT` or `WITH`.
 
 ## Skills
 
@@ -190,6 +218,25 @@ One `skills/` directory is the source. Claude Code reads it through the plugin m
 | [reconcile-metric-values](skills/reconcile-metric-values/SKILL.md) | Why do these two calculations of the same metric differ? |
 | [test-time-semantics](skills/test-time-semantics/SKILL.md) | Did a timezone, period end, late row, or fiscal calendar move the number? |
 | [define-metric-contract](skills/define-metric-contract/SKILL.md) | What is the metric, who owns it, and how close is close enough? |
+
+## Using it with dbt, Snowflake and the dbt Labs skills
+
+An analytics engineer is editing `fct_orders` in Cursor. The dbt Labs skills are installed beside these four. Those skills write and run the model, the project tests, and semantic-layer questions. These skills add the proof that the number is right before the change is merged. They do not replace the dbt Labs skills.
+
+The engineer asks:
+
+```text
+verify this change before I merge
+```
+
+The agent should do four read-only checks, in this order, with `dbt show --inline` or the Snowflake worksheet (Databricks SQL if that is the warehouse):
+
+1. `verify-grain-and-joins` on the compiled join. Is `order_item_id` still one row?
+2. `reconcile-metric-values` for the old query and the new query, by `order_date`.
+3. `test-time-semantics` if the model uses `CAST(ordered_at AS DATE)` on a UTC timestamp and the business zone is America/New_York. The warehouse form is `CONVERT_TIMEZONE`.
+4. `define-metric-contract` if the definition, owner, or tolerance changed.
+
+A reply on the seeded synthetic demo (seed 20260315, not a real business) looks like this. Evidence: the day-level total difference is 0.00, and 105.50 of revenue sits on the wrong days (2024-01-14/15 is 80.00, 2024-03-09/10 is 15.50, 2024-07-03/04 is 10.00). If the same change also joins refunds before the sum, the total is 225.00 too high while the basic tests still pass. Assumptions: timestamps are UTC and the business calendar is America/New_York. Unknowns: none in that demo. The dbt Labs skills still own compiling and running the model. This reply only says whether the number moved for a reason you can point at.
 
 ## Results
 
@@ -226,6 +273,7 @@ An optional with-skill versus without-skill benchmark lives in [evals/agent-comp
 - CI checks relative links. It does not re-fetch documentation URLs.
 - GitHub's hosted secret scanning is a repository setting. This repo runs gitleaks 8.30.1 in CI instead of changing that setting.
 - The gif at the top is a line-by-line playback of captured `make demo-timezone` output, not a hand-typed session. The fanout gif lower down is the same kind of playback of `make demo`.
+- On 2026-11-10, Claude Code 2.1.319 was not logged in. `claude plugin validate` on this checkout passed with an icon warning. Installing from the local checkout succeeded. `claude plugin marketplace add saliaaa/data-trust-skills` failed because the default branch does not yet contain the marketplace file. A Cursor session that loads the installed skills was not run.
 
 ## Compatibility
 
