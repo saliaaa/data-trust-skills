@@ -3,7 +3,7 @@ from pathlib import Path
 
 import duckdb
 
-from data_trust.demo import analyze, format_report, load_demo, run_demo
+from data_trust.demo import analyze, format_report, format_timezone_report, load_demo, run_demo
 from data_trust.lint import lint_grouped_select
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -38,6 +38,13 @@ def test_demo_numbers_and_green_basic_checks():
     assert "fanout" in codes
     assert "dropped_rows" not in codes
     text = format_report(result)
+    timezone = format_timezone_report(result)
+    for line in timezone.splitlines():
+        if line and line != "section: timezone":
+            assert line in text
+    assert "2024-01-14: utc 0.00 business 80.00 difference -80.00" in timezone
+    assert "2024-07-04: utc 10.00 business 0.00 difference 10.00" in timezone
+    assert "total difference: 0.00" in timezone
     assert "inflation: 225.00" in text
     assert "extra rows: 5" in text
     assert "revenue on shifted rows: 105.50" in text

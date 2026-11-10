@@ -3,6 +3,9 @@
 demo:
 	uv run python examples/broken-revenue-demo/run_demo.py
 
+demo-timezone:
+	uv run python examples/broken-revenue-demo/run_demo.py --timezone
+
 test:
 	uv run pytest
 
