@@ -1,20 +1,26 @@
 # Install in Claude Code
 
-The skill files live in [`skills/`](../skills/verify-grain-and-joins/SKILL.md). [`plugin.json`](../.claude-plugin/plugin.json) names the plugin, and [`marketplace.json`](../.claude-plugin/marketplace.json) points the marketplace at `./`, the repository root. Claude Code's default plugin layout scans `skills/` next to `.claude-plugin/`. This repo does not set an extra `skills` path, so that scan is not registered twice.
+Two routes. Neither needs this repo's Python package. The check SQL is inside each skill folder.
 
-These commands are the ones described in the Claude Code plugin docs:
+Marketplace, from the Claude Code plugin docs:
 
 ```bash
 claude plugin marketplace add saliaaa/data-trust-skills
 claude plugin install data-trust-skills@data-trust-skills
 ```
 
-A local checkout can be registered as a directory marketplace:
+[`.claude-plugin/plugin.json`](../.claude-plugin/plugin.json) names the plugin. [`.claude-plugin/marketplace.json`](../.claude-plugin/marketplace.json) points at `./`. Claude Code scans `skills/` next to that manifest.
+
+Project skills without the marketplace, which is also where `scripts/install.sh --claude` writes:
 
 ```bash
-claude plugin marketplace add /path/to/data-trust-skills
+bash /path/to/data-trust-skills/scripts/install.sh --claude .
 ```
 
-A one-session load, also from those docs and also not executed here, is `claude --plugin-dir /path/to/data-trust-skills`.
+That copies into `.claude/skills/`. User-level skills live in `~/.claude/skills/`.
 
-The helper commands in each skill assume the working directory is a checkout of this repo, with `uv sync` already run. A marketplace install's working directory was not tested.
+What was run on 2026-11-10 with Claude Code 2.1.319, not logged in:
+
+- `claude plugin validate` on this checkout passed. It warned that the plugin has no icon. No icon was added.
+- `claude plugin marketplace add /path/to/this/checkout` and `claude plugin install data-trust-skills@data-trust-skills` both succeeded.
+- `claude plugin marketplace add saliaaa/data-trust-skills` failed: `Marketplace file not found` on the default branch. That command works only after this file is on the default branch.

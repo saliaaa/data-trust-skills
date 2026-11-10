@@ -24,7 +24,7 @@ The helper accepts the fields below and rejects unknown keys, so a typo cannot p
 
 Aggregations are `sum`, `count`, `count_distinct`, `min`, `max`, and `avg`.
 
-A filled-in contract for the demo metric is [gross_item_revenue.contract.yaml](../../../examples/broken-revenue-demo/gross_item_revenue.contract.yaml).
+A filled-in synthetic example is [example.contract.yaml](example.contract.yaml).
 
 ## Skeleton
 

@@ -32,28 +32,14 @@ Name the check. Each one has its own inputs, and missing inputs are a stop, not 
 ## Workflow
 
 1. State the storage mode and both timezones before running anything.
-2. Run only the checks whose inputs you have:
-
-```bash
-uv run python skills/test-time-semantics/scripts/check_time.py \
-  --db warehouse.duckdb \
-  --source-file source.sql \
-  --timestamp-column ordered_at \
-  --storage utc_timestamp \
-  --stored-timezone UTC \
-  --business-timezone America/New_York \
-  --model-date-sql "CAST(ordered_at AS DATE)" \
-  --measure-sql line_amount \
-  --id-column order_id
-```
-
-3. For a date shift, quote `shifted_rows`, `shifted_measure`, and the example row.
+2. Run the matching statement in [references/checks.md](references/checks.md). Use `dbt show --inline`, the warehouse SQL editor, or a dbt MCP SQL tool that is already connected.
+3. For a date shift, quote `shifted_rows`, `shifted_amount`, and one example row.
 4. For daylight saving, separate repeated-hour rows (`dst_overlap`, informational) from stored times that fall in a missing hour (`dst_gap`, a defect). A UTC instant cannot fall in a spring-forward gap. A naive local clock can.
 5. For a period end, quote how many rows sit on the endpoint and which convention includes them.
 6. For late rows, separate "missing from a snapshot taken at as-of" from "slower than the allowed delay."
 7. For a fiscal calendar, quote how many rows have a fiscal year label different from their calendar year.
 
-The conversion and the fiscal rule are in [references/method.md](references/method.md).
+The conversion and the fiscal rule are in [references/method.md](references/method.md). The script in `scripts/check_time.py` is an optional DuckDB extra. A dbt project does not need it.
 
 ## Stop conditions
 
@@ -79,11 +65,7 @@ A missing measure, a window that was too wide to scan, and any check you did not
 
 ## Warehouse dialects
 
-The helper's conversions were executed with DuckDB `AT TIME ZONE`. DuckDB is the local stand-in. Use the warehouse functions below in the SELECT you ask the helper, or in the SQL you run yourself. Do not assume the three engines agree.
-
-Snowflake `TIMESTAMP_NTZ` is a civil time with no zone. `TIMESTAMP_LTZ` is shown in the session time zone. `TIMESTAMP_TZ` keeps the offset stored with the value. `CONVERT_TIMEZONE('UTC', 'America/New_York', ordered_at_ntz)` turns a `TIMESTAMP_NTZ` that means UTC into another zone. `CONVERT_TIMEZONE('America/New_York', ordered_at_tz)` takes a `TIMESTAMP_TZ` or `TIMESTAMP_LTZ` and returns the clock in the target zone.
-
-Databricks `timestamp` is shown in the session time zone. `timestamp_ntz` is a civil time with no zone. `to_utc_timestamp(ts, zone)` treats `ts` as a clock in `zone` and shifts it to UTC. `from_utc_timestamp(ts, zone)` treats `ts` as UTC and shifts the clock to `zone`.
+Statements are in [references/checks.md](references/checks.md). Snowflake: `CONVERT_TIMEZONE` with three arguments for `TIMESTAMP_NTZ`, and two arguments for `TIMESTAMP_TZ` or `TIMESTAMP_LTZ`. Databricks: `from_utc_timestamp` when the clock is UTC, `to_utc_timestamp` when the clock is already in the business zone. `timestamp` is session-timezone aware. `timestamp_ntz` has no zone.
 
 ## Query budget
 

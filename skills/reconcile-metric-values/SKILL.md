@@ -28,27 +28,12 @@ This skill explains a numeric gap. It does not choose a winner. Call the right-h
 
 ## Workflow
 
-1. State which side is the reference. The helper treats the right-hand query as the reference for a relative tolerance.
-2. Run:
+1. State which side is the reference. The right-hand query, or the time-travel copy, is the reference.
+2. Run the statement in [references/checks.md](references/checks.md) for Snowflake or Databricks. Use `dbt show --inline`, the warehouse SQL editor, or a dbt MCP SQL tool that is already connected.
+3. Report the two totals, the signed difference (new minus old), and the days or segments that are not zero.
+4. Stop when the residual is inside the supplied tolerance, or when no finer key was provided. The unexplained remainder is an unknown, not a zero.
 
-```bash
-uv run python skills/reconcile-metric-values/scripts/reconcile_metric.py \
-  --db warehouse.duckdb \
-  --left-file left.sql \
-  --right-file right.sql \
-  --metric revenue \
-  --keys order_date,region \
-  --time-column order_date \
-  --segments region \
-  --record-key order_date
-```
-
-3. Report the two totals, the signed difference (left minus right), and the absolute difference.
-4. Split the gap into left-only keys, right-only keys, and keys whose values disagree.
-5. Show the time buckets and segment buckets whose difference is not zero, then the top records.
-6. Stop when the residual is inside the supplied tolerance, or when no finer key was provided. The unexplained remainder is an unknown, not a zero.
-
-The decomposition rules are in [references/method.md](references/method.md).
+The decomposition rules are in [references/method.md](references/method.md). The script in `scripts/reconcile_metric.py` is an optional DuckDB extra. A dbt project does not need it.
 
 ## Stop conditions
 
@@ -74,21 +59,7 @@ Keys you could not align, a relative tolerance you could not evaluate, and any s
 
 ## Warehouse dialects
 
-The helper script runs on DuckDB, which is the local stand-in. To compare a table with an earlier copy, point the two SELECT statements at a time-travel read. Do not issue a write.
-
-Snowflake:
-
-```sql
-SELECT * FROM revenue AT(TIMESTAMP => '2024-06-01 00:00:00'::TIMESTAMP_TZ)
-SELECT * FROM revenue BEFORE(STATEMENT => '<query_id>')
-```
-
-Databricks SQL, for a Delta table:
-
-```sql
-SELECT * FROM revenue TIMESTAMP AS OF '2024-06-01T00:00:00.000Z'
-SELECT * FROM revenue VERSION AS OF 12
-```
+Full statements are in [references/checks.md](references/checks.md). Snowflake time travel uses `AT(TIMESTAMP => ...)` or `BEFORE(STATEMENT => ...)`. Databricks Delta uses `TIMESTAMP AS OF` or `VERSION AS OF`. Do not write.
 
 ## Query budget
 
