@@ -25,9 +25,33 @@ Snowflake and Databricks are the warehouses these checks are written for. A dbt 
 
 Related projects, linked and not copied, are mapped in [docs/ecosystem.md](docs/ecosystem.md).
 
-![Playback of make demo on a seeded synthetic dataset, not real business data. The visible totals are buggy 3377.50, correct 3152.50, and inflation 225.00.](docs/assets/demo.gif)
+![Playback of make demo-timezone. Seeded synthetic data, seed 20260315, not real business data. CAST(ordered_at AS DATE) moves 105.50 of revenue across days while the day-level total difference is 0.00.](docs/assets/demo-timezone.gif)
 
-The image is a line-by-line playback of the `make demo` output captured for this release, so the scroll stays readable. Those figures come from a seeded synthetic dataset (seed 20260315). They are not real business data.
+Timestamps are stored in UTC. The business reports in America/New_York. `CAST(ordered_at AS DATE)` puts `105.50` of revenue on the wrong days. The day-level total difference is `0.00`, so a check that only compares totals passes. These figures come from a seeded synthetic dataset (seed 20260315). They are not real business data. `make demo-timezone` prints this section:
+
+```text
+root cause 2: timezone boundary
+  stored: UTC naive timestamp
+  business timezone: America/New_York
+  model date expression: CAST(ordered_at AS DATE)
+  shifted line rows: 3
+  revenue on shifted rows: 105.50
+  shifted order: ord_tz_1 ordered_at 2024-01-15 03:30:00 model_date 2024-01-15 business_date 2024-01-14 revenue 80.00
+  shifted order: ord_tz_2 ordered_at 2024-03-10 04:15:00 model_date 2024-03-10 business_date 2024-03-09 revenue 15.50
+  shifted order: ord_tz_3 ordered_at 2024-07-04 03:59:00 model_date 2024-07-04 business_date 2024-07-03 revenue 10.00
+  day-level revenue moved: 105.50
+  the timezone bug does not change the grand total
+
+reconcile calendar days, deduped UTC date minus America/New_York date
+  total difference: 0.00
+  days with a difference:
+    2024-01-14: utc 0.00 business 80.00 difference -80.00
+    2024-01-15: utc 80.00 business 0.00 difference 80.00
+    2024-03-09: utc 0.00 business 15.50 difference -15.50
+    2024-03-10: utc 15.50 business 0.00 difference 15.50
+    2024-07-03: utc 0.00 business 10.00 difference -10.00
+    2024-07-04: utc 10.00 business 0.00 difference 10.00
+```
 
 ## Quick start
 
@@ -38,13 +62,17 @@ uv sync
 make demo
 ```
 
-`make demo` builds a seeded synthetic shop in memory, runs the buggy revenue model and the corrected one, and prints the inflation and the two root causes. The printed figures are not real business data. It does not connect to a warehouse or the network.
+`make demo` builds a seeded synthetic shop in memory, runs the buggy revenue model and the corrected one, and prints the inflation and the two root causes. `make demo-timezone` prints only the timezone section above. The printed figures are not real business data. It does not connect to a warehouse or the network.
 
 Install notes for each client: [Claude Code](docs/install-claude-code.md), [Cursor](docs/install-cursor.md), [Codex](docs/install-codex.md).
 
-## Sample
+## Second example: tests pass, total 225.00 too high
+
+![Playback of make demo on a seeded synthetic dataset, not real business data. The visible totals are buggy 3377.50, correct 3152.50, and inflation 225.00.](docs/assets/demo.gif)
 
 The input model is [`examples/broken-revenue-demo/models/buggy_revenue.sql`](examples/broken-revenue-demo/models/buggy_revenue.sql). It groups completed-order line amounts by UTC date and region, and it left-joins refunds before the sum. The reference model and the contract live beside it. The generator seed is `20260315`. Every figure below comes from that seeded synthetic dataset and is not real business data.
+
+The basic tests and the small SQL lint pass while the total is `225.00` too high. That gap is the refund join. Order `ord_fanout_1` is the counterexample: two line items and three refund rows, so each item is summed three times (`300.00` instead of `100.00`).
 
 This is the output of `make demo` on DuckDB 2.0.0:
 
@@ -132,8 +160,6 @@ unknowns
   - none
 ```
 
-The basic tests and the small SQL lint pass while the total is `225.00` too high. That gap is the refund join. The timezone bug moves `105.50` between calendar days and does not change the grand total. Order `ord_fanout_1` is the fanout counterexample: two line items and three refund rows, so each item is summed three times (`300.00` instead of `100.00`).
-
 ## Architecture
 
 ```mermaid
@@ -199,7 +225,7 @@ An optional with-skill versus without-skill benchmark lives in [evals/agent-comp
 - No dbt project, Snowflake worksheet, or Databricks workspace was invoked while preparing this repo. The demo is the DuckDB stand-in.
 - CI checks relative links. It does not re-fetch documentation URLs.
 - GitHub's hosted secret scanning is a repository setting. This repo runs gitleaks 8.30.1 in CI instead of changing that setting.
-- The gif at the top is a line-by-line playback of captured `make demo` output, not a hand-typed session.
+- The gif at the top is a line-by-line playback of captured `make demo-timezone` output, not a hand-typed session. The fanout gif lower down is the same kind of playback of `make demo`.
 
 ## Compatibility
 

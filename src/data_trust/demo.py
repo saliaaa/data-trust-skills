@@ -275,11 +275,70 @@ def analyze(con, seed: int = SEED) -> dict:
     }
 
 
+def _timezone_lines(result: dict) -> list[str]:
+    time_evidence = result["time"]["evidence"]
+    day_evidence = result["days"]["evidence"]
+    lines = [
+        "root cause 2: timezone boundary",
+        "  stored: UTC naive timestamp",
+        "  business timezone: America/New_York",
+        "  model date expression: CAST(ordered_at AS DATE)",
+        f"  shifted line rows: {time_evidence['shifted_rows']}",
+        f"  revenue on shifted rows: {money(time_evidence['shifted_measure'])}",
+    ]
+    for shifted in result["shifted_orders"]:
+        lines.append(
+            "  shifted order: "
+            f"{shifted['order_id']} ordered_at {shifted['ordered_at']} "
+            f"model_date {shifted['model_date']} business_date {shifted['business_date']} "
+            f"revenue {money(shifted['revenue'])}"
+        )
+    moved = sum((abs(row["difference"]) for row in day_evidence["by_time"]), Decimal("0")) / 2
+    lines.extend(
+        [
+            f"  day-level revenue moved: {money(moved)}",
+            "  the timezone bug does not change the grand total",
+        ]
+    )
+    return lines
+
+
+def _day_lines(result: dict) -> list[str]:
+    day_evidence = result["days"]["evidence"]
+    lines = [
+        "reconcile calendar days, deduped UTC date minus America/New_York date",
+        f"  total difference: {money(day_evidence['difference'])}",
+        "  days with a difference:",
+    ]
+    for row in day_evidence["by_time"]:
+        lines.append(
+            f"    {row['value']}: utc {money(row['left_total'])} "
+            f"business {money(row['right_total'])} difference {money(row['difference'])}"
+        )
+    return lines
+
+
+def format_timezone_report(result: dict) -> str:
+    """The timezone section of the full demo, with the same figures."""
+    lines = [
+        "data-trust-skills demo",
+        f"seed: {result['seed']}",
+        f"engine: duckdb {result['duckdb_version']} (in memory)",
+        "metric: gross_item_revenue",
+        "section: timezone",
+        "",
+        *_timezone_lines(result),
+        "",
+        *_day_lines(result),
+        "",
+    ]
+    return "\n".join(lines)
+
+
 def format_report(result: dict) -> str:
     totals = result["totals"]
     time_evidence = result["time"]["evidence"]
     order_evidence = result["orders"]["evidence"]
-    day_evidence = result["days"]["evidence"]
     lines = [
         "data-trust-skills demo",
         f"seed: {result['seed']}",
@@ -327,26 +386,7 @@ def format_report(result: dict) -> str:
     lines.extend(
         [
             "",
-            "root cause 2: timezone boundary",
-            "  stored: UTC naive timestamp",
-            "  business timezone: America/New_York",
-            "  model date expression: CAST(ordered_at AS DATE)",
-            f"  shifted line rows: {time_evidence['shifted_rows']}",
-            f"  revenue on shifted rows: {money(time_evidence['shifted_measure'])}",
-        ]
-    )
-    for shifted in result["shifted_orders"]:
-        lines.append(
-            "  shifted order: "
-            f"{shifted['order_id']} ordered_at {shifted['ordered_at']} "
-            f"model_date {shifted['model_date']} business_date {shifted['business_date']} "
-            f"revenue {money(shifted['revenue'])}"
-        )
-    moved = sum((abs(row["difference"]) for row in day_evidence["by_time"]), Decimal("0")) / 2
-    lines.extend(
-        [
-            f"  day-level revenue moved: {money(moved)}",
-            "  the timezone bug does not change the grand total",
+            *_timezone_lines(result),
             "",
             "daylight-saving scan",
             f"  repeated-hour rows: {time_evidence.get('overlap_rows', 0)}",
@@ -368,23 +408,7 @@ def format_report(result: dict) -> str:
             f"    {row['record']}: buggy {money(row['left_metric'])} "
             f"correct {money(row['right_metric'])} difference {money(row['difference'])}"
         )
-    lines.extend(
-        [
-            "",
-            "reconcile calendar days, deduped UTC date minus America/New_York date",
-            f"  total difference: {money(day_evidence['difference'])}",
-            "  days with a difference:",
-        ]
-    )
-    for row in day_evidence["by_time"]:
-        lines.append(
-            f"    {row['value']}: utc {money(row['left_total'])} "
-            f"business {money(row['right_total'])} difference {money(row['difference'])}"
-        )
-    lines.extend(
-        [
-            "",
-            "assumptions",
+    lines.extend(["", *_day_lines(result), "", "assumptions",
             "  - The reference metric is completed-order line amounts, with no refund join, on the America/New_York date.",
             "  - Gross item revenue does not subtract refunds.",
             "  - Extra revenue is the refund-join sum minus one copy of each line amount.",
@@ -424,7 +448,17 @@ def run_demo(seed: int = SEED) -> dict:
     return analyze(con, seed)
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Run the seeded synthetic revenue demo.")
+    parser.add_argument(
+        "--timezone",
+        action="store_true",
+        help="Print only the timezone section. Figures match the full demo.",
+    )
+    args = parser.parse_args(argv)
     result = run_demo()
-    print(format_report(result), end="")
+    text = format_timezone_report(result) if args.timezone else format_report(result)
+    print(text, end="")
     return 0
